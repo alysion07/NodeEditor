@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dark Themed Node Editor</title>
+
+  <!-- 구글 폰트 예시(선택 사항) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+          href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;600&display=swap"
+          rel="stylesheet"
+  >
+  <style>
+
+    /* 다크 테마 전역 변수 선언 */
+    :root {
+      --color-bg: #1a1d1f;         /* 전체 배경색 */
+      --color-grid: #24272a;       /* 그리드 라인 색상 */
+      --color-panel: #2b2e31;      /* 패널(사이드바, 노드 목록 등) 배경색 */
+      --color-card: #2f3236;       /* 카드/노드 내부 배경 */
+      --color-border: #3c4043;     /* 카드/노드 테두리 */
+      --color-text: #e4e4e4;       /* 기본 텍스트 색상 */
+      --color-accent: #ff8f40;     /* 강조(오렌지) 색상 */
+      --color-subtext: #9ea0a2;    /* 서브 텍스트나 아이콘 색상 */
+      --color-hover: #3e444a;      /* 마우스 오버시 배경 */
+      --color-active-node: #ff6f00;/* 노드 선택(활성) 시 테두리 등 강조색 */
+      --navbar-height: 48px;       /* 상단 네비 높이 */
+      --sidebar-width: 60px;       /* 왼쪽 사이드바 너비(아이콘 메뉴) */
+      --transition-speed: 0.2s;    /* UI 전환 애니메이션 속도 */
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    body {
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.4;
+    }
+
+    /* 전체 레이아웃 설정 */
+    .app-container {
+      display: grid;
+      grid-template-columns: var(--sidebar-width) 1fr auto;
+      grid-template-rows: var(--navbar-height) 1fr;
+      grid-template-areas:
+        "sidebar navbar  navbar"
+        "sidebar editor  inspector";
+      height: 100vh;
+    }
+
+    /* 상단 네비게이션 바 */
+    .navbar {
+      grid-area: navbar;
+      background-color: var(--color-panel);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .navbar .menu-btn {
+      color: var(--color-subtext);
+      cursor: pointer;
+      margin-right: 16px;
+      transition: color var(--transition-speed);
+    }
+
+    .navbar .menu-btn:hover {
+      color: var(--color-accent);
+    }
+
+    .navbar .search {
+      margin: 0 16px;
+      flex: 1;
+      background-color: var(--color-card);
+      border: none;
+      padding: 8px 12px;
+      color: var(--color-text);
+      outline: none;
+    }
+
+    .navbar .search::placeholder {
+      color: var(--color-subtext);
+    }
+
+    /* 왼쪽 사이드바 (아이콘 메뉴) */
+    .sidebar {
+      grid-area: sidebar;
+      background-color: var(--color-panel);
+      border-right: 1px solid var(--color-border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 8px;
+    }
+
+    /* 사이드바 아이콘 스타일 */
+    .sidebar-icon {
+      width: 40px;
+      height: 40px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-subtext);
+      cursor: pointer;
+      transition: background-color var(--transition-speed);
+    }
+
+    .sidebar-icon:hover {
+      background-color: var(--color-hover);
+      border-radius: 4px;
+    }
+
+    /* 노드 에디터 영역 */
+    .node-editor {
+      grid-area: editor;
+      position: relative;
+
+      /* 배경 그리드 효과: 회색 라인 격자 */
+      background-color: var(--color-bg);
+      background-image:
+              linear-gradient(var(--color-grid) 1px, transparent 1px),
+              linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+
+    /* 에디터 뷰 내부에서 드래그/줌 등을 컨트롤하는 경우 */
+    .editor-content {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* 노드 인스펙터(우측 패널) */
+    .inspector {
+      grid-area: inspector;
+      background-color: var(--color-panel);
+      border-left: 1px solid var(--color-border);
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    /* 노드 목록 (Inspector 내부) */
+    .nodes-list {
+      color: var(--color-text);
+      margin-bottom: 24px;
+    }
+
+    .nodes-list h3 {
+      margin-bottom: 8px;
+    }
+
+    .nodes-list .node-item {
+      background-color: var(--color-card);
+      padding: 8px;
+      margin-bottom: 8px;
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color var(--transition-speed);
+    }
+
+    .nodes-list .node-item:hover {
+      background-color: var(--color-hover);
+    }
+
+    /* 개별 노드 스타일 */
+    .node {
+      position: absolute; /* 에디터 안에서 자유롭게 배치 */
+      background-color: var(--color-card);
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      padding: 16px;
+      color: var(--color-text);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+      transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+      width: 180px;
+    }
+
+    /* 노드 제목 */
+    .node .node-header {
+      font-size: 14px;
+      margin-bottom: 8px;
+      color: var(--color-accent);
+      font-weight: 600;
+    }
+
+    /* 노드 타입 */
+    .node .node-type {
+      font-size: 12px;
+      color: var(--color-subtext);
+      margin-bottom: 4px;
+    }
+
+    /* 노드가 선택되었을 때(활성화) */
+    .node.selected {
+      border-color: var(--color-active-node);
+      box-shadow: 0 0 8px var(--color-active-node);
+    }
+
+    /* 노드 내 옵션 / 입력 필드 */
+    .node .node-config {
+      background-color: var(--color-bg);
+      padding: 8px;
+      border-radius: 4px;
+      margin-top: 8px;
+      border: 1px solid var(--color-border);
+    }
+
+    /* 노드 간 연결선이나 포트(아이콘)도 UI에 따라 추가 가능 */
+    .node .port {
+      width: 8px;
+      height: 8px;
+      background-color: var(--color-accent);
+      border-radius: 50%;
+      cursor: pointer;
+      margin-right: 4px;
+    }
+
+    /* 하단 툴바 (줌, 이동 등) 예시 */
+    .editor-toolbar {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: var(--color-panel);
+      padding: 8px 12px;
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .editor-toolbar button {
+      background-color: transparent;
+      border: none;
+      color: var(--color-subtext);
+      cursor: pointer;
+      transition: color var(--transition-speed);
+    }
+
+    .editor-toolbar button:hover {
+      color: var(--color-accent);
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+  <!-- 왼쪽 사이드바 -->
+  <div class="sidebar">
+    <div class="sidebar-icon">
+      <svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="20px"
+            width="20px"
+            viewBox="0 -960 960 960"
+            fill="#9ea0a2">
+        <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h357l-80 80H200v560h560v-278l80-80v358q0 33-23.5 56.5T760-120H200Zm280-360ZM360-360v-170l367-367q12-12 27-18t30-6q16 0 30.5 6t26.5 18l56 57q11 12 17 26.5t6 29.5q0 15-5.5 29.5T897-728L530-360H360Zm481-424-56-56 56 56ZM440-440h56l232-232-28-28-29-28-231 231v57Zm260-260-29-28 29 28 28 28-28-28Z"
+        />
+      </svg>
+    </div>
+    <div class="sidebar-icon">🛠</div>
+    <div class="sidebar-icon">⚙️</div>
+    <div class="sidebar-icon">🔌</div>
+  </div>
+
+  <!-- 상단 네비게이션 바 -->
+  <div class="navbar">
+    <div class="menu-btn">☰</div>
+    <input class="search" type="text" placeholder="Search project" />
+  </div>
+
+  <!-- 노드 에디터 영역 -->
+  <div class="node-editor">
+    <div class="editor-content">
+      <!-- 실제 Node들이 들어가는 곳 (드래그/줌 등) -->
+
+      <!-- 노드 예시 1 -->
+      <div class="node" style="top: 50px; left: 100px;">
+        <div class="node-header">Reddit Fetch</div>
+        <div class="node-type">SOURCE</div>
+        <div class="node-config">
+          <div>API Endpoint: /web_design</div>
+          <div>Fetch Limit: 300</div>
+          <div>Filter: "chrome"</div>
+        </div>
+      </div>
+
+      <!-- Timer 노드 (선택된 상태) -->
+      <div class="node selected" style="top: 200px; left: 280px;">
+        <div class="node-header">Timer</div>
+        <div class="node-type">DECISION</div>
+        <div class="node-config">
+          <label>Interval:</label>
+          <input type="number" value="60" style="width: 60px; margin-left:4px;"/>
+        </div>
+      </div>
+
+      <!-- 노드 예시 3 -->
+      <div class="node" style="top: 100px; left: 500px;">
+        <div class="node-header">API Post</div>
+        <div class="node-type">ACTION</div>
+        <div class="node-config">
+          <div>Endpoint: /post_data</div>
+        </div>
+      </div>
+
+      <!-- 에디터 하단 툴바 -->
+      <div class="editor-toolbar">
+        <button title="Zoom In">+</button>
+        <button title="Zoom Out">-</button>
+        <button title="Fit to Screen">Fit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 우측 패널 (Inspector) -->
+  <div class="inspector">
+    <div class="nodes-list">
+      <h3>NODES</h3>
+      <div class="node-item">Reddit Fetch</div>
+      <div class="node-item">API Fetch</div>
+      <div class="node-item">Timer</div>
+      <div class="node-item">Switch</div>
+      <div class="node-item">Conditional</div>
+      <div class="node-item">API Post</div>
+      <div class="node-item">Email</div>
+    </div>
+    <!-- 추가 설정이나 속성 편집 UI가 들어갈 수도 있음 -->
+  </div>
+</div>
+
+</body>
+</html>
