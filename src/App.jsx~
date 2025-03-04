@@ -130,9 +130,9 @@ function App() {
                 onSelectNode={selectSingleNode}
                 onMoveNode={handleMoveNode}
             />
-            {/*<Inspector  selectedNode={ nodes.find((n)= n.id === selectNodeId) || null }*/}
-            {/*onUpdateNode={handleUpdateNode}*/}
-            {/*/>*/}
+            <Inspector  selectedNode={ nodes.find((n)= n.id === selectNodeId) || null }
+            onUpdateNode={handleUpdateNode}
+            />
         </div>
     );
 }

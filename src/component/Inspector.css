@@ -1,0 +1,24 @@
+.inspector {
+    background-color: #2f3236;
+    border-left: 1px solid #3c4043;
+    padding: 16px;
+    color: #ffffff;
+    overflow-y: auto;
+}
+
+.inspector h2 {
+    margin: 0 0 16px;
+}
+
+.inspector label {
+    display: block;
+    margin-bottom: 12px;
+}
+
+.inspector input {
+    margin-left: 8px;
+    color: #fff;
+    background: #3c4043;
+    border: 1px solid #555;
+    padding: 4px 8px;
+}

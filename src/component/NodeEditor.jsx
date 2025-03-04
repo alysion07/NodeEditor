@@ -1,6 +1,7 @@
+import React from "react";
 import Node from "./Node";
 
-function NodeEditor({nodes, onSelectNode}) {
+function NodeEditor({nodes, onSelectNode, onMoveNode}) {
 
     return (
         <div className="node-editor">
@@ -8,8 +9,9 @@ function NodeEditor({nodes, onSelectNode}) {
                 {nodes.map((node) => (
                     <Node
                         key={node.id}
-                        {...node}                // id, title, nodeType, top, left, selected
-                        onSelect={onSelectNode}  // 클릭 시 특정 id를 상위에 알려줌
+                        {...node}
+                        onSelect={onSelectNode}
+                        onDrag={onMoveNode}   // ← 드래그 시 위치 변경
                     />
                 ))}
 
