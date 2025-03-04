@@ -4,6 +4,7 @@ import Sidebar from "./component/Sidebar.jsx";
 import Inspector from "./component/Inspector.jsx";
 import "./App.css"; // 다크 테마 & 노드 스타일
 import "./component/Sidebar.css";
+import "./component/inspector.css";
 
 function getRandomInteger(min, max) {
     // min 이상 max 이하의 랜덤 정수 반환
@@ -46,7 +47,8 @@ function App() {
             selected: false,
         },
     ]);
-
+    // 현재 선택된 노드의 id (null이면 선택된 노드 없음)
+    const [selectedNodeId, setSelectedNodeId] = useState(2);
     const addNode = () => {
         console.log("clicked on addNode");
         // New node data
@@ -67,11 +69,22 @@ function App() {
     //    NodeEditor → onSelectNode → App 에서 상태 수정
     // ─────────────────────────────────────────────────────────
     const selectSingleNode = (id) => {
+        setSelectedNodeId(id);
         setNodes((prev) =>
             prev.map((node) =>
                 node.id === id
                     ? { ...node, selected: true }
                     : { ...node, selected: false }
+            )
+        );
+    };
+    // 노드 속성 업데이트
+    const handleUpdateNode = (id, updatedProps) => {
+        setNodes((prev) =>
+            prev.map((node) =>
+                node.id === id
+                    ? { ...node, ...updatedProps }
+                    : node
             )
         );
     };
@@ -108,16 +121,6 @@ function App() {
             )
         );
     };
-    // 노드 속성 업데이트
-    const handleUpdateNode = (id, updatedProps) => {
-        setNodes((prev) =>
-            prev.map((node) =>
-                node.id === id
-                    ? { ...node, ...updatedProps }
-                    : node
-            )
-        );
-    };
 
     return (
         <div className="app-container">
@@ -130,9 +133,10 @@ function App() {
                 onSelectNode={selectSingleNode}
                 onMoveNode={handleMoveNode}
             />
-            {/*<Inspector  selectedNode={ nodes.find((n)= n.id === selectNodeId) || null }*/}
-            {/*onUpdateNode={handleUpdateNode}*/}
-            {/*/>*/}
+            <Inspector
+                selectedNode={nodes.find((n) => n.id === selectedNodeId) || null}
+                onUpdateNode={handleUpdateNode}
+            />
         </div>
     );
 }

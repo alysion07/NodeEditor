@@ -27,8 +27,8 @@
   grid-template-columns: var(--sidebar-width) 1fr auto;
   grid-template-rows: var(--navbar-height) 1fr;
   grid-template-areas:
-    "sidebar editor  inspector"
-    "sidebar editor  inspector";
+    "sidebar editor inspector"
+    "sidebar editor inspector";
   height: 100vh;
 }
 

@@ -1,5 +1,5 @@
 import React from "react";
-import "./Inspector.css";
+
 
 /**
  * Inspector: 선택된 Node의 속성 편집 컴포넌트
@@ -34,7 +34,7 @@ function Inspector({ selectedNode, onUpdateNode }) {
 
     return (
         <div className="inspector">
-            <h2>Inspector</h2>
+            <h3>Inspector</h3>
             <label>
                 Title:
                 <input

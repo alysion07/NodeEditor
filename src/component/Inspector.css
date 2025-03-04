@@ -1,4 +1,5 @@
 .inspector {
+    grid-area: inspector;
     background-color: #2f3236;
     border-left: 1px solid #3c4043;
     padding: 16px;
